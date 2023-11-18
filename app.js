@@ -68,7 +68,7 @@ app.post('/test', verifyToken, (req, res) => {
     res.send(req.user)
 })
 // Start the server
-const port = process.env.PORT || 2500;
+const port = process.env.PORT;
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
