@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const dotenv = require("dotenv").config();
 const otpGenerator = require("otp-generator");
 const path = require("path");
+const { printcon } = require("../print");
 
 const Verify = async (req, res) => {
   try {
@@ -35,7 +36,7 @@ const Verify = async (req, res) => {
     });
 
     const message1 = fs.readFileSync(path.join(__dirname, '../email.html'), "utf-8", (err) => {
-      console.log(err)
+      printcon(err)
     });
     const name = email.split("@", 2);
 
@@ -54,7 +55,7 @@ const Verify = async (req, res) => {
     transporter.sendMail(mailOptions, async (err, info) => {
 
       if (err) {
-        console.log('stress')
+        printcon(err)
         return res.send({ status: "fail", message: err });
 
       } else {
@@ -63,7 +64,7 @@ const Verify = async (req, res) => {
       }
     });
   } catch (error) {
-    console.log('fuck')
+    printcon(error)
     return res.send({ status: "fail", message: error })
   }
 };
@@ -90,7 +91,7 @@ const Check = async (req, res) => {
             } else {
               news = 'true'
             }
-            console.log('okay')
+            printcon('okay')
             return res.send({ status: 'success', message: "passcode verified successfully", data: email, new: news })
           }
         } else {
@@ -115,7 +116,7 @@ const Check = async (req, res) => {
 const Signup = async (req, res) => {
   try {
     const { email, password } = req.body
-    console.log('hello')
+    printcon('hello')
     const encryptPassword = await bcrypt.hash(password, 10);
     const token = jwt.sign(
       { email: email },

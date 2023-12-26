@@ -5,8 +5,9 @@ const cors = require('cors');
 const { Verify, Check, Signup, Signin } = require('./Controllers/EmailController');
 const { verifyToken } = require('./Authentication/Auth');
 const { gverify, gcheck, gparams } = require('./Controllers/GoogleController');
-const passport = require('passport')
-const GoogleStrategy = require('passport-google-oauth20').Strategy
+const { gitverify, gitparams, gitcheck } = require('./Controllers/GithubController');
+const { printcon } = require('./print');
+
 
 
 // Create an Express application
@@ -16,14 +17,15 @@ const app = express();
 let corsOptions;
 
 if (process.env.NODE_ENV === 'production') {
-    // Production configuration
+
+    printcon('running in production mode')
     corsOptions = {
-        origin: 'https://lo',
+        origin: 'https://francisokpani.com',
         credentials: true,
         optionSuccessStatus: 200
     };
 } else {
-    console.log('running in development mode')
+    printcon('running in development mode')
     corsOptions = {
         origin: 'http://localhost:3000',
         credentials: true,
@@ -35,14 +37,14 @@ if (process.env.NODE_ENV === 'production') {
 
 
 mongoose.connect('mongodb://127.0.0.1:27017/login').then(() => {
-    console.log("DB Connected Successfully")
+    printcon("DB Connected Successfully")
 }).catch((err) => {
-    console.log("Mongo not enabled locally")
+    printcon("Mongo not enabled locally")
     mongoose.connect(process.env.MONGO).then(() => {
-        console.log("DB Connected Successfully")
+        printcon("DB Connected Successfully")
     }).catch((err) => {
-        console.log("No internet connection")
-        console.log(err)
+        printcon("No internet connection")
+        printcon(err)
     })
 })
 
@@ -67,8 +69,11 @@ app.post('/signin', Signin)
 app.post('/test', verifyToken, (req, res) => {
     res.send(req.user)
 })
+//Github auth
+app.get('/gitauth', gitverify)
+app.post('/api/params/oauth/github/', gitparams)
 // Start the server
-const port = process.env.PORT||2500;
+const port = process.env.PORT || 2500;
 app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+    printcon(`Server is running on port ${port}`);
 });
