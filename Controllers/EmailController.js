@@ -122,7 +122,7 @@ const Signup = async (req, res) => {
       { email: email },
       process.env.TOKEN_KEY,
       {
-        expiresIn: "7d"
+        expiresIn: "30d"
       }
     );
     await user.findOneAndUpdate({ email: email }, { password: encryptPassword, token: token })
@@ -144,7 +144,7 @@ const Signin = async (req, res) => {
         { email: email },
         process.env.TOKEN_KEY,
         {
-          expiresIn: "7d"
+          expiresIn: "30d"
         }
       );
       await user.findOneAndUpdate({ email: email }, { token: token })

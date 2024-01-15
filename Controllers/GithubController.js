@@ -1,6 +1,8 @@
 const axios = require('axios')
 const querystring = require('querystring')
 const { printcon } = require('../print')
+const user = require('../Models/UserSchema')
+const jwt = require('jsonwebtoken')
 
 const gitverify = (req, res) => {
     const authUrl = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=${process.env.GITHUB_REDIRECT}&scope=user&allow_signup=true`
@@ -10,7 +12,6 @@ const gitparams = async (req, res) => {
 
     try {
         const { code } = req.body
-        printcon(req.body)
         const tokenUrl = 'https://github.com/login/oauth/access_token';
         const formData = {
             client_id: process.env.GITHUB_CLIENT_ID,
@@ -25,10 +26,9 @@ const gitparams = async (req, res) => {
             },
 
         })
-        printcon(code, response.data)
+
         const token = querystring.parse(response.data);
 
-        printcon(token.access_token)
         // Make an authorized API request using the access token
         const resp = await axios.get('https://api.github.com/user', {
             headers: {
@@ -47,19 +47,45 @@ const gitparams = async (req, res) => {
         resp.data.email = email
         const userInfo = resp.data;
 
+        if (typeof email == 'string') {
+            const tok = jwt.sign(
+                { email: email },
+                process.env.TOKEN_KEY,
+                {
+                    expiresIn: "30d"
+                }
+            );
+            await user.findOneAndUpdate({ email: userInfo.email }, { username: userInfo.name, gitid: userInfo.id, token: tok, img: userInfo.avatar_url }, { upsert: true })
+            printcon(`${userInfo.email} has been added`)
+            res.send({ token: tok, status: true });
+        }
+        else {
+            res.send({ status: false, err: 'error in git auth' })
+        }
+
         // Display user information
-        printcon(userInfo)
-        res.send(`Hello, ${userInfo}!`);
+
 
     } catch (error) {
-        printcon(error)
-        res.send(error);
+        if (error.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+            printcon(`Error status: ${error.response.status}`);
+            printcon(`Error data: ${JSON.stringify(error.response.data)}`);
+            res.send({ err: 'GitHub API error', status: false });
+        } else if (error.request) {
+            // The request was made but no response was received
+            printcon(`No response received from GitHub API`);
+            res.send({ err: 'No response from GitHub API', status: false });
+        } else {
+            // Something happened in setting up the request that triggered an Error
+            printcon(`Error setting up the request: ${error.message}`);
+            res.send({ err: 'Error setting up request', status: false });
+        }
     }
-    // res.send({ response})
-}
-const gitcheck = async (req, res) => {
 
 
 }
 
-module.exports = { gitverify, gitparams, gitcheck }
+
+module.exports = { gitverify, gitparams }

@@ -7,6 +7,7 @@ const { verifyToken } = require('./Authentication/Auth');
 const { gverify, gcheck, gparams } = require('./Controllers/GoogleController');
 const { gitverify, gitparams, gitcheck } = require('./Controllers/GithubController');
 const { printcon } = require('./print');
+const { xverify, xparams } = require('./Controllers/XController');
 
 
 
@@ -72,6 +73,9 @@ app.post('/test', verifyToken, (req, res) => {
 //Github auth
 app.get('/gitauth', gitverify)
 app.post('/api/params/oauth/github/', gitparams)
+//X auth
+app.get('/xauth', xverify)
+app.post('/api/params/oauth/x/', xparams)
 // Start the server
 const port = process.env.PORT || 2500;
 app.listen(port, () => {

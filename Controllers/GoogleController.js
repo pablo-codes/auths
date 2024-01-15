@@ -1,15 +1,13 @@
 const axios = require('axios')
-const querystring = require('querystring');
 const { printcon } = require('../print');
+const jwt = require('jsonwebtoken')
+const user = require('../Models/UserSchema');
 
 const gverify = (req, res) => {
     const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=${process.env.GOOGLE_REDIRECT}&client_id=${process.env.GOOGLE_CLIENT_ID}&access_type=offline&response_type=code&prompt=consent&scope=email`;
     res.send(authUrl)
 }
 
-async function getUserInfo(accessToken) {
-
-}
 
 const gcheck = async (req, res) => {
     try {
@@ -23,13 +21,21 @@ const gcheck = async (req, res) => {
             },
         });
         const userInfo = response.data;
-
+        const tok = jwt.sign(
+            { email: userInfo.email },
+            process.env.TOKEN_KEY,
+            {
+                expiresIn: "30d"
+            }
+        );
+        await user.findOneAndUpdate({ email: userInfo.email }, { googleid: userInfo.id, img: userInfo.picture, token: tok }, { upsert: true })
         // Display user information
-        printcon(userInfo)
-        res.send(`Hello, ${userInfo.email, userInfo.verified_email, userInfo.picture}!`);
+        printcon(userInfo.email + ' has been added')
+
+        res.send({ token: tok, status: true });
     } catch (error) {
         printcon(error)
-        res.status(500).send(error);
+        res.send({ err: error, status: false });
     }
 
 }
