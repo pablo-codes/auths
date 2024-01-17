@@ -17,11 +17,6 @@ jobs:
         with:
           node-version: "18"
 
-      - name: 💻Build Project
-        run: |
-          npm install
-          CI=false npm run build -
-
       - name: deploy file to server
         uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
