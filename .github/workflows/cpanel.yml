@@ -17,10 +17,17 @@ jobs:
         with:
           node-version: "18"
 
-      - name: 📁Sync files
-        uses: Samkirkland/FTP-Deploy-Action@v4.3.4
+      - name: 💻Build Project
+        run: |
+          npm install
+          CI=false npm run build -
+
+      - name: deploy file to server
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
           server: ${{ secrets.ftp_server }}
           username: ${{ secrets.ftp_username }}
           password: ${{ secrets.ftp_password }}
-          server-dir: /login/
+          port: 22
+          remote_path: "login"
+          sftp_only: true
