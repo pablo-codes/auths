@@ -32,6 +32,8 @@ const Verify = async (req, res) => {
       auth: {
         user: process.env.SMTP_EMAIL,
         pass: process.env.SMTP_PASS,
+      }, tls: {
+        rejectUnauthorized: false
       },
     });
 
